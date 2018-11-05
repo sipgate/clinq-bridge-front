@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@clinq/bridge@^3.2.0":
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/@clinq/bridge/-/bridge-3.2.0.tgz#3b5169a0f79c59c2d1cef19b4a49a0d903693aed"
-  integrity sha1-O1FpoPecWcLRzvGbSkmg2QNpOu0=
+"@clinq/bridge@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@clinq/bridge/-/bridge-5.0.0.tgz#53d5e60922f3db0bfb520aae0b370f933e085c48"
+  integrity sha512-1zU5uLZV0WUz5m/c2HGiZsqo2JxCzRuLgiYazsJkszdN3CANjuT3e5Wb0kxywumI7jKSpm4hDnIyrlb3z8+EAA==
   dependencies:
     ajv "^6.1.1"
     axios "^0.18.0"
