@@ -55,7 +55,7 @@ const getContacts = async (accessToken: string) => {
             ...convertContactsToClinq(response.data._results)
         ];
 
-        const nextUrl = response.data._pagination.next;
+        const nextUrl = response.data._pagination ? response.data._pagination.next : false;
         if (nextUrl) {
             return getNextChunk(allContacts, nextUrl);
         } else {
