@@ -1,63 +1,52 @@
 import { Adapter, Config, Contact, PhoneNumber, start } from "@clinq/bridge";
 import { Request } from "express";
+import axios from "axios";
+
+const API_URL_CONTACTS = 'https://api2.frontapp.com/contacts';
+
+const convertContact = (frontContact): Contact => ({
+    id: String(frontContact.id),
+    name: frontContact.name,
+    email: frontContact.handles
+        .filter(handle => handle.source === 'email')
+        .map(handle => handle.handle)[0]
+        || null,
+    company: null,
+    contactUrl: frontContact._links.self,
+    avatarUrl: frontContact.avatar_url,
+    phoneNumbers: frontContact.handles
+        .filter(handle => handle.source === 'phone')
+        .map(handle => ({
+            label: null,
+            phoneNumber: handle.handle
+        }))
+});
+
+const isValidContact = (contact: Contact): boolean =>
+    Array.isArray(contact.phoneNumbers) && contact.phoneNumbers.length > 0;
+
+const getContacts = async (accessToken: string) => {
+    const response = await axios.get(API_URL_CONTACTS, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`
+        }
+    });
+
+    if (!Array.isArray(response.data._results)) {
+        return [];
+    }
+
+    return response.data._results
+        .map(convertContact)
+        .filter(contact => isValidContact(contact));
+};
 
 class FrontAdapter implements Adapter {
-    /**
-     * TODO: Fetch contacts from the contacts provider using config.apiKey and config.apiUrl or throw on error
-     */
     public async getContacts(config: Config): Promise<Contact[]> {
-        const phoneNumber: PhoneNumber = {
-            label: "Mobile",
-            phoneNumber: "+4915799912345"
-        };
-        const contacts: Contact[] = await Promise.resolve([
-            {
-                id: "7f23375d-35e2-4034-889a-2bdc9cba9633",
-                company: "MyCompany GmbH",
-                email: "mustermann@example.com",
-                name: "Max Mustermann",
-                phoneNumbers: [phoneNumber],
-                avatarUrl: null,
-                contactUrl: null
-            }
-        ]);
-        return contacts;
-    }
-
-    /**
-     * REQUIRED FOR OAUTH2 FLOW
-     * Return the redirect URL for the given contacts provider.
-     * Users will be redirected here to authorize CLINQ.
-     */
-    public async getOAuth2RedirectUrl(): Promise<string> {
-        const redirectUrl = await Promise.resolve(
-            "https://crm.example.com/oauth2/authorize"
-        );
-        return redirectUrl;
-    }
-
-    /**
-     * REQUIRED FOR OAUTH2 FLOW
-     * Users will be redirected here after authorizing CLINQ.
-     *
-     * TODO: Extract the 'code' from request, fetch an access token
-     * and return it as 'apiKey'
-     */
-    public async handleOAuth2Callback(req: Request): Promise<Config> {
-        // EXAMPLE:
-        // const { code } = req.query;
-        // const query = queryString.stringify({ code });
-        // const response = await request(`https://crm.example.com/oauth2/token?${query}`)
-        // return {
-        //   apiKey: response.accessToken,
-        //   apiUrl: response.instanceUrl
-        // };
-
-        const config: Config = await Promise.resolve({
-            apiKey: "a1b2c3",
-            apiUrl: "https://eu5.crm.example.com/api"
-        });
-        return config;
+        const { apiKey } = config;
+        const results = await getContacts(apiKey);
+        //console.log('xxxxxxxxxxxxxxxxxx', results);
+        return results;
     }
 }
 
