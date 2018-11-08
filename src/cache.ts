@@ -2,7 +2,7 @@ import { IKeyValueStore } from "./models";
 
 interface ICacheItem {
     timestamp: number;
-    data: any;
+    value: any;
 }
 
 export class Cache {
@@ -15,10 +15,29 @@ export class Cache {
     }
 
     public async get(key) {
-        return this.kvstore.get(key);
+        const isExpired = (item: ICacheItem): boolean =>
+            (Date.now() - item.timestamp) / 1000 > this.ttlSeconds;
+
+        const cacheItem: ICacheItem = await this.kvstore.get(key);
+
+        let resultValue;
+        if (cacheItem) {
+            if (!isExpired(cacheItem)) {
+                resultValue = cacheItem.value;
+            } else {
+                this.kvstore.delete(key);
+            }
+        }
+
+        return resultValue;
     }
 
     public async put(key, value) {
-        return this.kvstore.set(key, value);
+        const cacheItem: ICacheItem = {
+            timestamp: Date.now(),
+            value,
+        };
+
+        return this.kvstore.set(key, cacheItem);
     }
 }
