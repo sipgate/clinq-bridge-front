@@ -22,10 +22,24 @@ class FrontAdapter implements Adapter {
 
     public async getContacts(config: Config): Promise<Contact[]> {
         const { apiKey } = config;
-        return await this.getContactsFromFront(apiKey);
+
+        const cacheKey = crypto
+            .createHash("sha256")
+            .update(apiKey)
+            .digest("hex");
+
+        const cachedContacts: Contact[] = await this.cache.get(cacheKey);
+
+        if (cachedContacts) {
+            return cachedContacts;
+        } else {
+            const fetchedContacts = await this.fetchContactsFromFront(apiKey);
+            await this.cache.put(cacheKey, fetchedContacts);
+            return fetchedContacts;
+        }
     }
 
-    protected async getContactsFromFront(accessToken: string): Promise<Contact[]> {
+    protected async fetchContactsFromFront(accessToken: string): Promise<Contact[]> {
         const convertContactToClinq = (frontContact: IFrontContact): Contact => {
             const phoneNumbers = frontContact.handles
                 .filter((handle: IFrontContactHandle) => {
@@ -64,7 +78,7 @@ class FrontAdapter implements Adapter {
                 .filter((contact: Contact) => contact);
         };
 
-        const fetchNextChunk = async (contacts: Contact[], url: string) => {
+        const fetchNextChunk = async (contacts: Contact[], url: string): Promise<Contact[]> => {
             const result = (await axios.get<IFrontResult>(url, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -88,19 +102,7 @@ class FrontAdapter implements Adapter {
 
         };
 
-        const cacheKey = crypto
-            .createHash("sha256")
-            .update(accessToken)
-            .digest("hex");
-
-        const cachedContacts = await this.cache.get(cacheKey);
-        if (cachedContacts) {
-            return cachedContacts;
-        } else {
-            const fetchedContacts = await fetchNextChunk([], API_CONTACTS_URL);
-            this.cache.put(cacheKey, fetchedContacts);
-            return fetchedContacts;
-        }
+        return fetchNextChunk([], API_CONTACTS_URL);
     }
 }
 

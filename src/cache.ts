@@ -25,7 +25,7 @@ export class Cache {
             if (!isExpired(cacheItem)) {
                 resultValue = cacheItem.value;
             } else {
-                this.kvstore.delete(key);
+                await this.kvstore.delete(key);
             }
         }
 
@@ -38,6 +38,8 @@ export class Cache {
             value,
         };
 
-        return this.kvstore.set(key, cacheItem);
+        await this.kvstore.set(key, cacheItem);
+
+        return cacheItem;
     }
 }
