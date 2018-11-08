@@ -1,5 +1,6 @@
 import { Adapter, Config, Contact, PhoneNumber, start } from "@clinq/bridge";
 import axios from "axios";
+import * as crypto from "crypto";
 import { Request } from "express";
 import { Cache } from "./cache";
 import { MapKeyValueStore } from "./map-key-value-store";
@@ -63,9 +64,7 @@ class FrontAdapter implements Adapter {
                 .filter((contact: Contact) => contact);
         };
 
-        const getNextChunk = async (contacts: Contact[], url: string) => {
-            // console.log(`fetching contacts via ${url}`);
-
+        const fetchNextChunk = async (contacts: Contact[], url: string) => {
             const result = (await axios.get<IFrontResult>(url, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
@@ -82,14 +81,26 @@ class FrontAdapter implements Adapter {
 
             const nextUrl = result._pagination ? result._pagination.next : false;
             if (nextUrl) {
-                return getNextChunk(allContacts, nextUrl);
+                return fetchNextChunk(allContacts, nextUrl);
             } else {
                 return allContacts;
             }
 
         };
 
-        return getNextChunk([], API_CONTACTS_URL);
+        const cacheKey = crypto
+            .createHash("sha256")
+            .update(accessToken)
+            .digest("hex");
+
+        const cachedContacts = await this.cache.get(cacheKey);
+        if (cachedContacts) {
+            return cachedContacts;
+        } else {
+            const fetchedContacts = await fetchNextChunk([], API_CONTACTS_URL);
+            this.cache.put(cacheKey, fetchedContacts);
+            return fetchedContacts;
+        }
     }
 }
 
