@@ -1,15 +1,15 @@
-export interface FrontContactHandle {
-    source: string;
+export interface IFrontContactHandle {
     handle?: string | undefined;
+    source: string;
 }
 
-export interface FrontContact {
+export interface IFrontContact {
     _links: {
         self: string;
-    },
+    };
+    avatar_url?: string | undefined;
+    description?: string | undefined;
+    handles?: IFrontContactHandle[] | undefined;
     id: string;
     name?: string | undefined;
-    description?: string | undefined;
-    avatar_url?: string | undefined;
-    handles?: FrontContactHandle[] | undefined;
 }

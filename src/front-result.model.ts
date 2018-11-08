@@ -1,10 +1,10 @@
-export interface FrontResult {
+export interface IFrontResult {
+    _links: {
+        self: string;
+    };
     _pagination: {
         prev: string | undefined;
         next: string | undefined;
-    };
-    _links: {
-        self: string;
     };
     _results: any;
 }
