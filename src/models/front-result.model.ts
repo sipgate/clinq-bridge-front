@@ -1,3 +1,5 @@
+import { IFrontContact } from ".";
+
 export interface IFrontResult {
     _links: {
         self: string;
@@ -6,5 +8,5 @@ export interface IFrontResult {
         prev: string | undefined;
         next: string | undefined;
     };
-    _results: any;
+    _results: IFrontContact[];
 }

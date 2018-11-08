@@ -1,8 +1,7 @@
 import { Adapter, Config, Contact, PhoneNumber, start } from "@clinq/bridge";
 import axios from "axios";
 import { Request } from "express";
-import { IFrontContact, IFrontContactHandle } from "./front-contact.model";
-import { IFrontResult } from "./front-result.model";
+import { IFrontContact, IFrontContactHandle, IFrontResult } from "./models";
 
 const API_CONTACTS_URL   = "https://api2.frontapp.com/contacts";
 const API_CONTACTS_LIMIT = 100;
