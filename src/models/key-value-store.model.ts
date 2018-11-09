@@ -1,5 +1,5 @@
 export interface IKeyValueStore {
-    get: (k) => Promise;
-    delete: (k) => Promise;
-    set: (k, v) => Promise;
+    get: (k) => Promise<any>;
+    delete: (k) => Promise<any>;
+    set: (k, v) => Promise<any>;
 }

@@ -7,15 +7,15 @@ export class MapKeyValueStore implements IKeyValueStore {
         this.map = new Map<any, any>();
     }
 
-    public async get(k) {
+    public async get(k): Promise<any> {
         return this.map.get(k);
     }
 
-    public async delete(k) {
+    public async delete(k): Promise<any> {
         return this.map.delete(k);
     }
 
-    public async set(k, v) {
+    public async set(k, v): Promise<any> {
         return this.map.set(k, v);
     }
 }
