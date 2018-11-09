@@ -3,12 +3,10 @@ import axios from "axios";
 import * as crypto from "crypto";
 import { Request } from "express";
 import { Cache } from "./cache";
+import { env } from "./env-parser";
+import { log } from "./logging";
 import { MapKeyValueStore } from "./map-key-value-store";
 import { IFrontContact, IFrontContactHandle, IFrontResult } from "./models";
-
-const API_CONTACTS_URL   = "https://api2.frontapp.com/contacts";
-const API_CONTACTS_LIMIT = 100;
-const CACHE_TTL_SECONDS  = (10 * 60);
 
 class FrontAdapter implements Adapter {
     private cache: Cache;
@@ -16,7 +14,7 @@ class FrontAdapter implements Adapter {
     constructor() {
         this.cache = new Cache(
             new MapKeyValueStore(),
-            CACHE_TTL_SECONDS,
+            env.CACHE_TTL_SECONDS,
         );
     }
 
@@ -31,9 +29,16 @@ class FrontAdapter implements Adapter {
         const cachedContacts: Contact[] = await this.cache.get(cacheKey);
 
         if (cachedContacts) {
+            log.debug("contacts cache hit", { cacheKey, contactsCount: cachedContacts.length });
+
             return cachedContacts;
         } else {
+            log.debug("contacts cache miss", { cacheKey });
+
             const fetchedContacts = await this.fetchContactsFromFront(apiKey);
+
+            log.debug("fetching contacts complete", { cacheKey, contactsCount: fetchedContacts.length });
+
             await this.cache.put(cacheKey, fetchedContacts);
             return fetchedContacts;
         }
@@ -79,12 +84,14 @@ class FrontAdapter implements Adapter {
         };
 
         const fetchNextChunk = async (contacts: Contact[], url: string): Promise<Contact[]> => {
+            log.trace("fetching contacts chunk", { url });
+
             const result = (await axios.get<IFrontResult>(url, {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
                 params: {
-                    limit: API_CONTACTS_LIMIT,
+                    limit: env.API_CONTACTS_LIMIT,
                 },
             })).data;
 
@@ -102,7 +109,7 @@ class FrontAdapter implements Adapter {
 
         };
 
-        return fetchNextChunk([], API_CONTACTS_URL);
+        return fetchNextChunk([], env.API_CONTACTS_URL);
     }
 }
 
