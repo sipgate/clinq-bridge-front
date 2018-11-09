@@ -21,9 +21,9 @@ const parseEnv = (): IEnvVars => {
     } = process.env;
 
     const externalEnv = {
-        API_CONTACTS_LIMIT : API_CONTACTS_LIMIT && parseInt(API_CONTACTS_LIMIT),
+        API_CONTACTS_LIMIT : API_CONTACTS_LIMIT && parseInt(API_CONTACTS_LIMIT, 10),
         API_CONTACTS_URL,
-        CACHE_TTL_SECONDS  : CACHE_TTL_SECONDS && parseInt(CACHE_TTL_SECONDS),
+        CACHE_TTL_SECONDS  : CACHE_TTL_SECONDS && parseInt(CACHE_TTL_SECONDS, 10),
         LOGLEVEL,
     };
 
@@ -36,6 +36,6 @@ const parseEnv = (): IEnvVars => {
         }, Object.assign({}, defaults));
 
     return mergedEnv;
-}
+};
 
 export const env: IEnvVars = parseEnv();
