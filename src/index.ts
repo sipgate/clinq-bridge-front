@@ -3,7 +3,7 @@ import axios from "axios";
 import * as crypto from "crypto";
 import { Request } from "express";
 import { Cache } from "./cache";
-import { env } from "./env-parser";
+import { env } from "./env";
 import { log } from "./logging";
 import { MapKeyValueStore } from "./map-key-value-store";
 import { IFrontContact, IFrontContactHandle, IFrontResult } from "./models";
