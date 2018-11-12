@@ -5,16 +5,18 @@ import { Request } from "express";
 import { Cache } from "./cache";
 import { env } from "./env";
 import { log } from "./logging";
-import { MapKeyValueStore } from "./map-key-value-store";
+// import { MapKeyValueStore } from "./map-key-value-store";
 import { IFrontContact, IFrontContactHandle, IFrontResult } from "./models";
+import { RedisKeyValueStore } from "./redis-key-value-store";
 
 class FrontAdapter implements Adapter {
     private cache: Cache;
 
     constructor() {
         this.cache = new Cache(
-            new MapKeyValueStore(),
-            env.CACHE_TTL_SECONDS,
+            // new MapKeyValueStore(),
+            new RedisKeyValueStore(env.REDIS_URL, env.CACHE_TTL_SECONDS),
+            env.CACHE_TTL_SECONDS + 30,  // because Redis handles TTL expiration on its own
         );
     }
 
