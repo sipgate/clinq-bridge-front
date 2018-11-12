@@ -4,6 +4,8 @@ services:
   redis:
     image: redis:5.0
     restart: unless-stopped
+    ports:
+      - "6379:6379"
 
   app:
     build:
@@ -12,6 +14,9 @@ services:
     volumes:
       - .:/root/app:Z
     environment:
+      API_CONTACTS_LIMIT: 3
+      CACHE_TTL_SECONDS: 20
+      LOGLEVEL: trace
       REDIS_URL: redis://redis
     ports:
       - "8080:8080"
