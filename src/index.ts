@@ -70,9 +70,11 @@ class FrontAdapter implements Adapter {
 
       return phoneNumbers.length > 0
         ? {
-            avatarUrl: frontContact.avatar_url,
+            // TODO: Make avatarUrl publicly available temporarily
+            avatarUrl: null, // frontContact.avatar_url,
             company: null,
-            contactUrl: frontContact._links.self,
+            // TODO: Deep link to app.frontapp.com (e.g. https://app.frontapp.com/contacts/tea:597938)
+            contactUrl: null, // frontContact._links.self,
             email:
               frontContact.handles
                 .filter(
