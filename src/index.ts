@@ -1,4 +1,10 @@
-import { Adapter, Config, Contact, start } from "@clinq/bridge";
+import {
+  Adapter,
+  Config,
+  Contact,
+  PhoneNumberLabel,
+  start
+} from "@clinq/bridge";
 import axios from "axios";
 import { env } from "./env";
 import { log } from "./logging";
@@ -6,29 +12,25 @@ import { IFrontContact, IFrontContactHandle, IFrontResult } from "./models";
 
 const convertContact = (frontContact: IFrontContact): Contact => {
   const phoneNumbers = frontContact.handles
-  .filter((handle: IFrontContactHandle) => {
-    return (
-        handle.source === "phone" &&
-        handle.handle &&
-        handle.handle.length > 0
-    );
-  })
-  .map((handle: IFrontContactHandle) => ({
-    label: null,
-    phoneNumber: handle.handle
-  }));
+    .filter((handle: IFrontContactHandle) => {
+      return (
+        handle.source === "phone" && handle.handle && handle.handle.length > 0
+      );
+    })
+    .map((handle: IFrontContactHandle) => ({
+      label: PhoneNumberLabel.WORK,
+      phoneNumber: handle.handle
+    }));
 
   return phoneNumbers.length > 0
-      ? {
+    ? {
         // TODO: Make avatarUrl publicly available temporarily
         avatarUrl: null, // frontContact.avatar_url,
         // TODO: Deep link to app.frontapp.com (e.g. https://app.frontapp.com/contacts/tea:597938)
         contactUrl: null, // frontContact._links.self,
         email:
-            frontContact.handles
-            .filter(
-                (handle: IFrontContactHandle) => handle.source === "email"
-            )
+          frontContact.handles
+            .filter((handle: IFrontContactHandle) => handle.source === "email")
             .map((handle: IFrontContactHandle) => handle.handle)[0] || null,
         firstName: null,
         id: frontContact.id,
@@ -37,20 +39,18 @@ const convertContact = (frontContact: IFrontContact): Contact => {
         organization: null,
         phoneNumbers
       }
-      : null;
+    : null;
 };
 
-const convertContactsToClinq = (
-    frontContacts: IFrontContact[]
-): Contact[] =>
-    Array.isArray(frontContacts) ? frontContacts
-    .map(convertContact)
-    .filter((contact: Contact) => contact) : [];
+const convertContactsToClinq = (frontContacts: IFrontContact[]): Contact[] =>
+  Array.isArray(frontContacts)
+    ? frontContacts.map(convertContact).filter((contact: Contact) => contact)
+    : [];
 
 const fetchContacts = async (
-    accessToken: string,
-    accumulator: Contact[] = [],
-    url: string = env.API_CONTACTS_URL
+  accessToken: string,
+  accumulator: Contact[] = [],
+  url: string = env.API_CONTACTS_URL
 ): Promise<Contact[]> => {
   log.trace("fetching contacts chunk", { url });
 
@@ -63,10 +63,7 @@ const fetchContacts = async (
     }
   })).data;
 
-  const contacts = [
-    ...accumulator,
-    ...convertContactsToClinq(result._results)
-  ];
+  const contacts = [...accumulator, ...convertContactsToClinq(result._results)];
 
   const nextUrl = result._pagination ? result._pagination.next : false;
 
