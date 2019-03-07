@@ -20,7 +20,7 @@
     "clean": "rm -rf ./dist"
   },
   "dependencies": {
-    "@clinq/bridge": "^7.7.0",
+    "@clinq/bridge": "^7.7.1",
     "@types/express": "^4.16.0",
     "@types/node": "^10.12.9",
     "axios": "^0.18.0",
